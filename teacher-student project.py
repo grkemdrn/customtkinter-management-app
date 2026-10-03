@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
 
-# Veritabanı bağlantısı
 conn = psycopg2.connect(
     database="postgres",
     user="postgres",
@@ -37,7 +36,7 @@ def open_experience_filter_window(parent_window):
     filter_window = ctk.CTkToplevel(parent_window)
     filter_window.title("Experience Filter")
     filter_window.geometry("350x320") 
-    filter_window.grab_set() # Sadece bu pencereye odaklanmayı zorunlu kılar
+    filter_window.grab_set() 
     filter_window.focus_force()
     
     ctk.CTkLabel(filter_window, text="Teacher Filtering", font=("Arial", 14, "bold")).pack(pady=(15, 10))
@@ -240,7 +239,6 @@ def open_announcement_window(parent_window, refresh_func, current_user):
     class_combobox.set("Select a class") 
     class_combobox.pack(pady=5)
 
-    # Eğitmen adını elle girmek yerine otomatik kendi adını kullanıyoruz
     ctk.CTkLabel(announcement_window, text=f"Instructor: {current_user}", font=("Arial", 12, "bold")).pack(pady=10)
 
     ctk.CTkLabel(announcement_window, text="Fee (TL):").pack(pady=2)
@@ -302,7 +300,6 @@ def open_delete_announcement_window(parent_window, refresh_func, current_user):
 
     try:
         cursor = conn.cursor()
-        # SADECE O ANKİ HOCANIN İLANLARINI ÇEKİYORUZ
         cursor.execute("SELECT id, class_name, user_name, fee, class_mode FROM announcements WHERE user_name = %s ORDER BY id ASC;", (current_user,))
         records = cursor.fetchall()
         for row in records:
@@ -352,7 +349,6 @@ def open_instructor_dashboard(current_user):
     instructor_window.title(f"Instructor Dashboard - {current_user}")
     instructor_window.geometry("500x600")
     
-    # Kapanınca ana ekranı geri getir
     def on_closing():
         instructor_window.destroy()
         root.deiconify() 
@@ -370,7 +366,6 @@ def open_instructor_dashboard(current_user):
     def refresh_display():
         try:
             cursor = conn.cursor()
-            # SADECE KENDİ İLANLARINI LİSTELE
             cursor.execute("SELECT * FROM announcements WHERE user_name = %s;", (current_user,))
             saved_announcements = cursor.fetchall()
             cursor.close()
@@ -416,7 +411,6 @@ def open_instructor_dashboard(current_user):
     def delete_all_notifications(window):
         try:
             cursor = conn.cursor()
-            # SADECE BU HOCANIN DERSLERİYLE İLGİLİ BİLDİRİMLERİ SİL
             cursor.execute("""
                 DELETE FROM student_selections 
                 WHERE course_name IN (SELECT class_name FROM announcements WHERE user_name = %s)
@@ -439,7 +433,6 @@ def open_instructor_dashboard(current_user):
         
         try:
             cursor = conn.cursor()
-            # SADECE BU HOCANIN AÇTIĞI DERSLERE GELEN KAYITLARI GÖSTER
             query = """
             SELECT s.id, s.student_name, s.course_name, s.selection_date, MAX(m.email) 
             FROM student_selections s 
@@ -511,7 +504,6 @@ def open_instructor_dashboard(current_user):
 
         try:
             cursor = conn.cursor()
-            # SADECE BU HOCANIN ÖĞRENCİLERİNİ LİSTELE
             query = """
                 SELECT student_name, course_name 
                 FROM student_selections 
@@ -755,10 +747,8 @@ def handle_login():
     if is_authenticated:
         label_status.configure(text=f"Login Successful! Role: {user_role}", text_color="green")
         
-        # Ana giriş sayfasını gizle
         root.withdraw()
         
-        # Giriş yapan kullanıcı adını dashboard'a yolla
         if user_role == "instructor":
             open_instructor_dashboard(username_input)
         elif user_role == "student":
@@ -784,8 +774,7 @@ def open_register_window():
     reg_window= ctk.CTkToplevel(root)
     reg_window.title ("Register")
     reg_window.geometry("350x350")
-    reg_window.grab_set() # Popup arka plana kaçmasını engeller
-
+    reg_window.grab_set() 
     ctk.CTkLabel(reg_window, text="Create New Account", font=("Gotham", 20, "bold")).pack(pady=15)
     ctk.CTkLabel(reg_window, text= "New Username:").pack(pady=5)
     entry_new_user= ctk.CTkEntry (reg_window,width=130)
